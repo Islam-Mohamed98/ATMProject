@@ -66,7 +66,8 @@ class date_logs:
     # Function To Get Totalwithdraw Per Day
     def get_any_withdraw(self):
         # Count
-        sql = "SELECT totalwithdraw FROM logs  WHERE Day1 = %s and ID = %s ORDER BY Num DESC LIMIT 1" % (self.day, self.id)
+        sql = "SELECT totalwithdraw FROM logs  WHERE Day1 = %s and ID = %s ORDER BY Num DESC" \
+              " LIMIT 1" % (self.day, self.id)
         try:
             # Execute the SQL command
             cursor.execute(sql)
@@ -76,7 +77,6 @@ class date_logs:
             print "Error : Cant Fetch Data1235"
         # Change tuple To int
         check = int(results[0][0])
-
         return check
 
 # ============================================[  Get  Any Row  ]========================================================
@@ -108,5 +108,5 @@ class date_logs:
             results = cursor.fetchall()
         except:
             print "Error : Cant Fetch Data1235"
-        # Change tuple To int
+        # Change tuple To
         return results

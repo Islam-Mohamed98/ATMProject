@@ -62,7 +62,7 @@ class DBOperation:
         try:
             # Execute the SQL command
             cursor.execute(sql)
-            # Ferch all the rows in a list of lists.
+            # Fetch all the rows in a list of lists.
             results = cursor.fetchall()
         except:
             print "Error : Cant Fetch Data"
@@ -75,7 +75,7 @@ class DBOperation:
     # Function To Update User
     def add_balance(self, balance):
         # Insert New User
-        sql = "UPDATE %s  SET balance = %s WHERE ID = %s " %(table_name, balance, self.id)
+        sql = "UPDATE %s  SET balance = %s WHERE ID = %s " % (table_name, balance, self.id)
         try:
             # Execute the SQL command
             cursor.execute(sql)
@@ -106,7 +106,7 @@ class DBOperation:
     # Function To Insert User
     def insert_user(self, balance):
         # Insert New User
-        sql = "INSERT INTO %s (ID, PIN ,balance ) VALUES (%s, %s, %s)" %(table_name, self.id, self.pin, balance)
+        sql = "INSERT INTO %s (ID, PIN ,balance ) VALUES (%s, %s, %s)" % (table_name, self.id, self.pin, balance)
         try:
             # Execute the SQL command
             cursor.execute(sql)
@@ -118,9 +118,9 @@ class DBOperation:
 
 # ============================================[ ATM Balance Check ]=====================================================
     # Function To Check ATM Balance
-    def atm_balance_check(self):
+    def atm_full_check(self):
         # Get ATM Balance
-        sql = "SELECT balance FROM atm WHERE 1"
+        sql = "SELECT * FROM atm WHERE 1"
         try:
             # Execute the SQL command
             cursor.execute(sql)
@@ -129,9 +129,9 @@ class DBOperation:
         except:
             print "Error : Cant Fetch Data"
         # Change tuple To int
-        balance = int(results[0][0])
+
         # Return Value of Balance
-        return balance
+        return results
 
 # ============================================[ ATM Balance Update ]====================================================
     # Function To Update ATM Balance
@@ -146,6 +146,23 @@ class DBOperation:
         except:
             # Rollback in case there is any error
             db.rollback()
+
+
+# ============================================[ Update 200 / 100/ 50 values ]===========================================
+    # Function To Update Update 200 / 100/ 50 values
+    def atm_x200x100x50_update(self, x200, x100, x50, x20, x10):
+        # Update ATM Balance
+        sql = "UPDATE `atm` SET `200` = '%s', `100` = '%s', `50` = '%s', `20` = '%s', `10` = '%s' WHERE `atm`.`id` = 1" % (x200, x100, x50, x20, x10)
+        try:
+            # Execute the SQL command
+            cursor.execute(sql)
+            # Commit your changes in the database
+            db.commit()
+            print "sucsee"
+        except:
+            # Rollback in case there is any error
+            db.rollback()
+            print"fail"
 
 # ======================================================================================================================
 # Disconnect from server

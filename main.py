@@ -63,11 +63,11 @@ while option1 == 0 and option2 != 0:
         option2 -= 1
         print "Wrong PIN  %s Chance" % option2
 
-# =========/Class DBOperation/========
-# ===      Get User Balance        ===
+# ========/Class DBOperation/========
+# ===      Get User Balance       ===
     object1 = DBOperation(ID)
-    atmbc = object1.atm_balance_check()
-# ====================================
+    atmbc = object1.atm_full_check()
+# ===================================
 
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -79,15 +79,23 @@ if flag == 2:
     x = int(input())
     if x == 1:
         AtmBalance = DBOperation(ID, PIN)
-        balance = AtmBalance.atm_balance_check()
-        print "ATM Balance Is %s" % balance
+        balance = AtmBalance.atm_full_check()  # Get Atm Balance
+        print "ATM Balance Is %s" % balance[0][1]
     if x == 2:
-        print "Enter Cash"
-        x = int(input())
+        print "Enter Cash 200"
+        x200 = int(input())
+        print "Enter Cash 100"
+        x100 = int(input())
+        print "Enter Cash 50"
+        x50 = int(input())
+        print "Enter Cash 20"
+        x20 = int(input())
+        print "Enter Cash 10"
+        x10 = int(input())
 
         # =========/Class ATMFill/====================
         # ===      Return ATM Balnce               ===
-        AtmBalanceInsert = ATMFill(x)
+        AtmBalanceInsert = ATMFill(x200, x100, x50, x20, x10)
         existbalance = AtmBalanceInsert.filling()
         # =============================================
 
@@ -109,46 +117,73 @@ elif flag == 1:
 
 # ========================================[ Windows3..withdraw ]========================================================
     if x == 1:
-        print "Enter Cash"
-        cash = int(input())  # --------------/////------/////-----> Ramon (Get Number From Button Or Input Label)
+# /////////////////////
+# //  Get ATM Values //
+        atm = DBOperation(ID)
+        atm_info = atm.atm_full_check()
+# /////////////////////
+        print "Max of 200 = %s / 100 = %s / 50 = %s / 20 = %s 10 " \
+              "= %s" % (atm_info[0][2], atm_info[0][3], atm_info[0][4], atm_info[0][5], atm_info[0][6])
+        check1st = date_logs(ID, userhist, userday, usertime)
+        first = check1st.first_operation_check()  # Check if its First Operation For User
 
+        if first == 0:
+            st1 = 1
+            totalwith = 0
+        else:
+            st1 = 0
+            checked = date_logs(ID, userhist, userday, usertime, 0, st1)
+            totalwith = checked.get_any_withdraw()  # Get Total Withdraw
+        userbalance = atm.balance_check()
+        allowedwithdraw = 5000 - totalwith
+        print "Your Balance %s" % userbalance
+        print "WithDraw Allowed %s" % allowedwithdraw  # if user balance >
+        print "Enter Cash 200"
+        x200 = int(input())
+        print "Enter Cash 100"
+        x100 = int(input())
+        print "Enter Cash 50"
+        x50 = int(input())
+        print "Enter Cash 20"
+        x20 = int(input())
+        print "Enter Cash 10"
+        x10 = int(input())
+
+        NumberList = [x200, x100, x50, x20, x10]
         # ===========/Class withdraw/============
         # ===      Return 0 or 1              ===
-        get_money = withdraw(ID, PIN, b, cash, atmbc, userhist, userday, usertime)
+        get_money = withdraw(ID, PIN, b, NumberList, atmbc, userhist, userday, usertime)
         check = get_money.gui_balance_check()
         # =======================================
-        if check == 999:
-            print "Srry ATM Dont Have Enought Money"
-            print(time.asctime())
-        elif check == 1:
-            print "withdraw Done Your balance Now is %s" % get_money.b
-            print(time.asctime())
-        elif check == 666:
-            print "Max Value To withdraw 5000"
-        elif check == 222:
-            print "You Cant withdraw More Than 5000 per Day"
-        else:
-            print "You Dont Have Enough Money"
-            print(time.asctime())
-
-
+        userbalance = atm.balance_check()
+        print check
+        print "your balance now %s" % userbalance
+        print time.asctime()
 # ========================================[ Windows4..depposite ]=======================================================
     elif x == 2:
-        print "Enter Cash"
-        cash = int(input())  # --------------/////------/////-----> Ramon (Get Number From Button Or Input Label)
+        print "Enter Cash 200"
+        x200 = int(input())
+        print "Enter Cash 100"
+        x100 = int(input())
+        print "Enter Cash 50"
+        x50 = int(input())
+        print "Enter Cash 20"
+        x20 = int(input())
+        print "Enter Cash 10"
+        x10 = int(input())
 
-    # =============/class depposite/==============
+        NumberList = [x200, x100, x50, x20, x10]
+
+        # =============/class depposite/==============
     # ====      Add Balance                    ===
-        get_money2 = depposite(ID, PIN, b, cash, atmbc, userhist, userday, usertime)
+        get_money2 = depposite(ID, PIN, b, NumberList, atmbc, userhist, userday, usertime)
         check = get_money2.add_balance()
     # ============================================
         if check == 1:
             print "Your Balance Now is %s" % get_money2.b
             print(time.asctime())
-        elif check == 222:
-            print "You Cant Deposite More than 40000 Per Day"
         elif check == 0:
-            print "Max Value TO Deppsite 40000"
+            print " More Than 30 Paper (Error)"
 
 
 # ========================================[ Windows5..CheckBalance ]====================================================
