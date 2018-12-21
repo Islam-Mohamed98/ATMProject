@@ -117,6 +117,8 @@ class transfer:
         if self.b >= self.cash:
             self.b -= self.cash
             # insert balance to Trans maker
+            InsertBalance = DBOperation(self.id)  # insert balance to Trans maker
+            InsertBalance.add_balance(self.b)
             opertaion = "Trans %s To ID + %s" % (self.cash, self.id2)  # Operation Row Content
             datalogs = date_logs(self.id, self.userhist, self.userday, self.usertime, opertaion, self.st1)
             datalogs.insert_operation(self.totalwith, self.totaldep, self.b)  # Insert Values in Logs Table
@@ -125,6 +127,7 @@ class transfer:
             get_user2_balance = DBOperation(self.id2)
             user2 = get_user2_balance.balance_check()
             user2 += self.cash
+            get_user2_balance.add_balance(user2)
             # Insert Balance To user 2
             opertaion = "You Got %s From ID %s" % (self.cash, self.id)  # Operation Row Content
             check1st = date_logs(self.id2, self.userhist, self.userday, self.usertime)

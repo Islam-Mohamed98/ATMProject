@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 25, 2018 at 01:01 PM
+-- Generation Time: Dec 25, 2018 at 01:16 PM
 -- Server version: 10.1.37-MariaDB
 -- PHP Version: 7.3.0
 
@@ -45,7 +45,7 @@ CREATE TABLE `atm` (
 --
 
 INSERT INTO `atm` (`id`, `balance`, `200`, `100`, `50`, `20`, `10`) VALUES
-(1, 20760, 56, 60, 49, 41, 29);
+(1, 24820, 68, 75, 51, 43, 31);
 
 -- --------------------------------------------------------
 
@@ -64,8 +64,8 @@ CREATE TABLE `information` (
 --
 
 INSERT INTO `information` (`ID`, `PIN`, `balance`) VALUES
-(1234, 1234, 4310),
-(2222, 2222, 5000);
+(1234, 1234, 5990),
+(2222, 2222, 7380);
 
 -- --------------------------------------------------------
 
@@ -91,14 +91,11 @@ CREATE TABLE `logs` (
 --
 
 INSERT INTO `logs` (`Num`, `ID`, `Date1`, `Day1`, `time1`, `operation`, `1st`, `totalwithdraw`, `totaldepposite`, `balance`) VALUES
-(3, 1234, 'Tue Dec 25 13:01:04 2018', 25, '13:01:04', '2', 0, 380, 380, 4490),
-(4, 2222, 'Tue Dec 25 13:02:18 2018', 25, '13:02:18', 'depposite + 380', 1, 0, 380, 4980),
-(5, 2222, 'Tue Dec 25 13:02:38 2018', 25, '13:02:38', 'depposite + 20', 0, 0, 400, 5000),
-(6, 1234, 'Tue Dec 25 13:02:58 2018', 25, '13:02:58', '2', 0, 380, 380, 4190),
-(7, 2222, 'Tue Dec 25 13:02:58 2018', 25, '13:02:58', 'You Got 500 From ID 1234', 0, 0, 400, 5500),
-(8, 1234, 'Tue Dec 25 13:26:48 2018', 25, '13:26:48', '2', 0, 380, 760, 5070),
-(9, 1234, 'Tue Dec 25 13:27:28 2018', 25, '13:27:28', '2', 0, 760, 760, 4690),
-(10, 1234, 'Tue Dec 25 13:31:20 2018', 25, '13:31:20', '2', 0, 1140, 760, 4310);
+(24, 1234, 'Tue Dec 25 14:14:26 2018', 25, '14:14:26', 'depposite + 1060', 1, 0, 1060, 7990),
+(25, 1234, 'Tue Dec 25 14:14:37 2018', 25, '14:14:37', 'Trans 1000 To ID + 2222', 0, 0, 1060, 6990),
+(26, 2222, 'Tue Dec 25 14:14:37 2018', 25, '14:14:37', 'You Got 1000 From ID 1234', 0, 0, 0, 6380),
+(27, 1234, 'Tue Dec 25 14:14:48 2018', 25, '14:14:48', 'Trans 1000 To ID + 2222', 0, 0, 1060, 5990),
+(28, 2222, 'Tue Dec 25 14:14:48 2018', 25, '14:14:48', 'You Got 1000 From ID 1234', 0, 0, 0, 7380);
 
 --
 -- Indexes for dumped tables
@@ -130,7 +127,7 @@ ALTER TABLE `logs`
 -- AUTO_INCREMENT for table `logs`
 --
 ALTER TABLE `logs`
-  MODIFY `Num` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `Num` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 --
 -- Database: `phpmyadmin`
 --
@@ -288,7 +285,7 @@ CREATE TABLE `pma__recent` (
 --
 
 INSERT INTO `pma__recent` (`username`, `tables`) VALUES
-('root', '[{\"db\":\"info\",\"table\":\"logs\"},{\"db\":\"info\",\"table\":\"atm\"},{\"db\":\"info\",\"table\":\"information\"},{\"db\":\"info\",\"table\":\"log\"},{\"db\":\"info\",\"table\":\"test\"},{\"db\":\"info\",\"table\":\"ATM\"},{\"db\":\"info\",\"table\":\"tttttttt\"},{\"db\":\"info\",\"table\":\"est\"},{\"db\":\"sdsd\",\"table\":\"sdsdsdsdsd\"},{\"db\":\"test\",\"table\":\"sads\"}]');
+('root', '[{\"db\":\"info\",\"table\":\"logs\"},{\"db\":\"info\",\"table\":\"information\"},{\"db\":\"info\",\"table\":\"atm\"},{\"db\":\"info\",\"table\":\"log\"},{\"db\":\"info\",\"table\":\"test\"},{\"db\":\"info\",\"table\":\"ATM\"},{\"db\":\"info\",\"table\":\"tttttttt\"},{\"db\":\"info\",\"table\":\"est\"},{\"db\":\"sdsd\",\"table\":\"sdsdsdsdsd\"},{\"db\":\"test\",\"table\":\"sads\"}]');
 
 -- --------------------------------------------------------
 
@@ -403,7 +400,7 @@ CREATE TABLE `pma__userconfig` (
 --
 
 INSERT INTO `pma__userconfig` (`username`, `timevalue`, `config_data`) VALUES
-('root', '2018-12-25 11:50:58', '{\"Console\\/Mode\":\"collapse\"}');
+('root', '2018-12-25 12:15:03', '{\"Console\\/Mode\":\"collapse\"}');
 
 -- --------------------------------------------------------
 
