@@ -2,73 +2,60 @@
 from dbconnections import *
 from data_logs import *
 
-# ===============================================[withdraw Class ]======================================================
-class withdraw:
-     def __init__(self, ID , PIN , b , NumberList, atmbc, userhist, userday, usertime):
+
+# ===============================================[UserCheck Class ]=====================================================
+class UserCheck:
+
+    def __init__(self, ID, userhist, userday, usertime):
         self.id = ID
-        self.pin = PIN
-        self.b = b
-        self.NumberList = NumberList
-        self.atmbc = atmbc  # atm balance
         self.userhist = userhist
         self.userday = userday
         self.usertime = usertime
 
+    def user_info_get(self):
+        check1st = date_logs(self.id, self.userhist, self.userday, self.usertime)
+        first = check1st.first_operation_check()  # Check if its First Operation For User
+        if first == 0:
+            st1 = 1
+            totalwith = 0
+            totaldep = 0
+        else:
+            st1 = 0
+            checked = date_logs(self.id, self.userhist, self.userday, self.usertime, 0, st1)
+            totalwith = checked.get_any_withdraw()  # Get Total Withdraw Last One
+            totaldep = checked.get_any_totaldepposite()  # Get Total dep Last One
+
+        result = [totalwith, totaldep, st1]
+        return result
+
+
+# ===============================================[withdraw Class ]======================================================
+class WithDraw:
+
+     def __init__(self, ID , PIN , b , NumberList, userhist, userday, usertime, st1, withdep):
+        self.id = ID
+        self.pin = PIN
+        self.b = b
+        self.NumberList = NumberList
+        self.userhist = userhist
+        self.userday = userday
+        self.usertime = usertime
+        self.value = self.NumberList[0] * 200 + self.NumberList[1] * 100 \
+                + self.NumberList[2] * 50 + self.NumberList[3] * 20 + self.NumberList[4] * 10
+        self.st1 = st1
+        self.totalwith = withdep[0]
+        self.totaldep = withdep[1]
+
      def gui_balance_check(self):
 
-         check1st = date_logs(self.id, self.userhist, self.userday, self.usertime)
-         first = check1st.first_operation_check()  # Check if its First Operation For User
-         if first == 0:  # if user First Time Per Day
-             st1 = 1
-             value = self.NumberList[0] * 200 + self.NumberList[1] * 100 \
-                     + self.NumberList[2] * 50 + self.NumberList[3] * 20 + self.NumberList[4] * 10
-
-             self.b -= value  # suptract input cash from user
-             insertbalance = DBOperation(self.id, self.pin)
-             insertbalance.add_balance(self.b)  # add New Balance To user
-
-             # ///////////////////////////////////////////////////////////////////////////////////
-             # ///////////////////////////////////////////////////////////////////////////////////
-             # //                 Insert Papers and Balance To ATM                            //
-             AtmBalanceInsert = unATMFill(self.NumberList[0], self.NumberList[1],
-                                        self.NumberList[2], self.NumberList[3], self.NumberList[4])
-             AtmBalanceInsert.filling()
-             # ///////////////////////////////////////////////////////////////////////////////////
-             # ///////////////////////////////////////////////////////////////////////////////////
-
-             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-             opertaion = "withdraw - %s" % value  # Operation Row Content
-             datalogs = date_logs(self.id, self.userhist, self.userday, self.usertime, opertaion, st1)
-             datalogs.insert_operation(value, 0)  # Insert Values in Logs Table
-             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-         else:
-             st1 = 0  # if Not First time Per Day
-             value1 = self.NumberList[0] * 200 + self.NumberList[1] * 100 \
-                     + self.NumberList[2] * 50 + self.NumberList[3] * 20 + self.NumberList[4] * 10
-
-
-             self.b -= value1  # Suptract balance from user
-             insertbalance = DBOperation(self.id, self.pin)
-             insertbalance.add_balance(self.b)  # add New Balance To user
-
-             # ///////////////////////////////////////////////////////////////////////////////////
-             # ///////////////////////////////////////////////////////////////////////////////////
-             # //                 Insert Papers and Balance To ATM                            //
-             AtmBalanceInsert = unATMFill(self.NumberList[0], self.NumberList[1],
-                                        self.NumberList[2], self.NumberList[3], self.NumberList[4])
-             AtmBalanceInsert.filling()
-             # ///////////////////////////////////////////////////////////////////////////////////
-             # ///////////////////////////////////////////////////////////////////////////////////
-             opertaion = "withdraw - %s" % value1  # Operation Content
-             datalogs1 = date_logs(self.id, self.userhist, self.userday, self.usertime, opertaion, st1)
-             totalwith1 = datalogs1.get_any_withdraw()  # Get Total Withdraw
-             totaldep = datalogs1.get_any_totaldepposite()  # Get Total Deppsite
-             inputingCash = value1 + totalwith1  # Total Withdraw Per Day
-             datalogs1.insert_operation(inputingCash, totaldep)  # Insert Values in Logs
+         insertbalance = DBOperation(self.id, self.pin)
+         self.b -= self.value  # suptract input cash from user
+         insertbalance.add_balance(self.b)  # add New Balance To user
+         AtmBalanceInsert = UnATMFill(self.NumberList)
+         AtmBalanceInsert.filling()
+         opertaion = "withdraw - %s" % self.value  # Operation Row Content
+         datalogs = date_logs(self.id, self.userhist, self.userday, self.usertime, opertaion, self.st1)
+         datalogs.insert_operation(self.totalwith + self.value, self.totaldep, self.b)  # Insert Values in Logs Table
 
          return opertaion
 
@@ -76,48 +63,33 @@ class withdraw:
 # ===============================================[depposite Class ]=====================================================
 class depposite:
 
-    def __init__(self, ID, PIN, b, NumberList, atmbc,userhist, userday, usertime):
+    def __init__(self, ID, PIN, b, NumberList,userhist, userday, usertime, st1, withdep):
         self.id = ID
         self.pin = PIN
         self.b = b
         self.NumberList = NumberList
-        self.atmbc = atmbc
         self.userhist = userhist
         self.userday = userday
         self.usertime = usertime
-
+        self.value = NumberList[0] * 200 + NumberList[1] * 100 \
+                + NumberList[2] * 50 + NumberList[3] * 20 + NumberList[4] * 10
+        self.numberofpapers = NumberList[0] + NumberList[1] \
+                         + NumberList[2] + NumberList[3] + NumberList[4]
+        self.st1 = st1
+        self.totalwith = withdep[0]
+        self.totaldep = withdep[1]
 
     def add_balance(self):
 
-        # Calc Number of Papers
-        numberofpapers = self.NumberList[0] + self.NumberList[1]\
-                         + self.NumberList[2] + self.NumberList[3] + self.NumberList[4]
-
-        if numberofpapers <= 30:
-            # Value of Papers
-            value = self.NumberList[0]*200 + self.NumberList[1]*100\
-                    + self.NumberList[2]*50 + self.NumberList[3]*20 + self.NumberList[4]*10
-
-            self.b += value  # + value to user
+        if self.numberofpapers <= 30:
+            self.b += self.value  # + value to user
             InsertBalance = DBOperation(self.id, self.pin)
             InsertBalance.add_balance(self.b)  # Insert Value to User
-
-            # ///////////////////////////////////////////////////////////////////////////////////
-            # ///////////////////////////////////////////////////////////////////////////////////
-            # //                 Insert Papers and Balance To ATM                            //
-            AtmBalanceInsert = ATMFill(self.NumberList[0], self.NumberList[1],
-                                       self.NumberList[2], self.NumberList[3], self.NumberList[4])
+            AtmBalanceInsert = ATMFill(self.NumberList)
             AtmBalanceInsert.filling()
-            # ///////////////////////////////////////////////////////////////////////////////////
-            # ///////////////////////////////////////////////////////////////////////////////////
-
-            # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            opertaion = "depposite + %s" % value  # Operation Row Content
-            datalogs = date_logs(self.id, self.userhist, self.userday, self.usertime, opertaion)
-            datalogs.insert_operation(0, value)  # insert values in logs
-            # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            opertaion = "depposite + %s" % self.value  # Operation Row Content
+            datalogs = date_logs(self.id, self.userhist, self.userday, self.usertime, opertaion, self.st1)
+            datalogs.insert_operation(self.totalwith, self.totaldep + self.value, self.b)  # Insert Values in Logs Table
 
             check = 1
         else:
@@ -129,26 +101,46 @@ class depposite:
 # ===============================================[transfer Class ]=====================================================
 class transfer:
 
-    def __init__(self, ID, ID2, b, cash):
+    def __init__(self, ID, ID2, b, cash,userhist, userday, usertime, st1, withdep):
         self.id = ID  # user ID
         self.id2 = ID2  # user PIN
         self.b = b
         self.cash = cash
+        self.userhist = userhist
+        self.userday = userday
+        self.usertime = usertime
+        self.st1 = st1
+        self.totalwith = withdep[0]
+        self.totaldep = withdep[1]
 
     def transfer_balance(self):
         if self.b >= self.cash:
             self.b -= self.cash
-            InsertBalance = DBOperation(self.id)
-            InsertBalance.add_balance(self.b)
-
-            #Inster Balance To user 1
+            # insert balance to Trans maker
+            opertaion = "Trans %s To ID + %s" % (self.cash, self.id2)  # Operation Row Content
+            datalogs = date_logs(self.id, self.userhist, self.userday, self.usertime, opertaion, self.st1)
+            datalogs.insert_operation(self.totalwith, self.totaldep, self.b)  # Insert Values in Logs Table
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            # User 2
             get_user2_balance = DBOperation(self.id2)
             user2 = get_user2_balance.balance_check()
-
             user2 += self.cash
             # Insert Balance To user 2
-            InsertBalance = DBOperation(self.id2)
-            InsertBalance.add_balance(user2)
+            opertaion = "You Got %s From ID %s" % (self.cash, self.id)  # Operation Row Content
+            check1st = date_logs(self.id2, self.userhist, self.userday, self.usertime)
+            first = check1st.first_operation_check()  # Check if its First Operation For User
+            if first == 0:
+                st1 = 1
+                totalwith2 = 0
+                totaldep2 = 0
+            else:
+                st1 = 0
+                checked = date_logs(self.id2, self.userhist, self.userday, self.usertime, 0, st1)
+                totalwith2 = checked.get_any_withdraw()  # Get Total Withdraw Last One
+                totaldep2 = checked.get_any_totaldepposite()  # Get Total dep Last One
+
+            datalogs = date_logs(self.id2, self.userhist, self.userday, self.usertime, opertaion, self.st1)
+            datalogs.insert_operation(totalwith2, totaldep2, user2)  # Insert Values in Logs Table
 
             check = 1
         else:
@@ -159,24 +151,20 @@ class transfer:
 # ===============================================[Fill ATM ]=====================================================
 class ATMFill:
 
-    def __init__(self, x200, x100, x50, x20, x10):
-        self.x200 = x200
-        self.x100 = x100
-        self.x50 = x50
-        self.x20 = x20
-        self.x10 = x10
-
+    def __init__(self, numberlist):
+        self.NumberList = numberlist
 
     def filling(self):
 
         incash = DBOperation(1)
         g = incash.atm_full_check()  # Check Paper in ATM
-        old200 = int(g[0][2]) + self.x200
-        old100 = int(g[0][3]) + self.x100
-        old50 = int(g[0][4]) + self.x50
-        old20 = int(g[0][5]) + self.x20
-        old10 = int(g[0][6]) + self.x10
-        incash.atm_x200x100x50_update(old200, old100, old50, old20, old10)
+        old200 = int(g[0][2]) + self.NumberList[0]
+        old100 = int(g[0][3]) + self.NumberList[1]
+        old50 = int(g[0][4]) + self.NumberList[2]
+        old20 = int(g[0][5]) + self.NumberList[3]
+        old10 = int(g[0][6]) + self.NumberList[4]
+        numberstoreplace = [old200, old100, old50, old20, old10]
+        incash.atm_x200x100x50_update(numberstoreplace)
         x = incash.atm_full_check()  # Check NewPaper in ATM
         new200 = int(x[0][2])
         new100 = int(x[0][3])
@@ -185,29 +173,26 @@ class ATMFill:
         new10 = int(x[0][6])
         sum_of_balance = 200*new200 + 100*new100 + 50*new50 + new20*20 + new10*10  # Get Value Of paper
         incash.atm_balance_update(sum_of_balance)  # insert Value
-
         return sum_of_balance
+
+
 # ===============================================[unFill ATM ]=====================================================
-class unATMFill:
+class UnATMFill:
 
-    def __init__(self, x200, x100, x50, x20, x10):
-        self.x200 = x200
-        self.x100 = x100
-        self.x50 = x50
-        self.x20 = x20
-        self.x10 = x10
-
+    def __init__(self, numberlist):
+        self.NumberList = numberlist
 
     def filling(self):
 
         incash = DBOperation(1)
         g = incash.atm_full_check()  # Check Paper in ATM
-        old200 = int(g[0][2]) - self.x200
-        old100 = int(g[0][3]) - self.x100
-        old50 = int(g[0][4]) - self.x50
-        old20 = int(g[0][5]) - self.x20
-        old10 = int(g[0][6]) - self.x10
-        incash.atm_x200x100x50_update(old200, old100, old50, old20, old10)
+        old200 = int(g[0][2]) - self.NumberList[0]
+        old100 = int(g[0][3]) - self.NumberList[1]
+        old50 = int(g[0][4]) - self.NumberList[2]
+        old20 = int(g[0][5]) - self.NumberList[3]
+        old10 = int(g[0][6]) - self.NumberList[4]
+        numberstoreplace = [old200, old100, old50, old20, old10]
+        incash.atm_x200x100x50_update(numberstoreplace)
         x = incash.atm_full_check()  # Check NewPaper in ATM
         new200 = int(x[0][2])
         new100 = int(x[0][3])

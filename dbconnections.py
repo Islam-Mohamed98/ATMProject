@@ -33,14 +33,14 @@ cursor = db.cursor()
 
 class DBOperation:
     # __init__ build in function
-    def __init__(self, id=0, pin=0):
-        self.id = id  # user ID
-        self.pin = pin  # user PIN
+    def __init__(self, card_id=0, card_pin=0):
+        self.id = card_id  # user ID
+        self.pin = card_pin  # user PIN
 
 # ============================================[  Login Check Method  ]==================================================
-    # Function To Check ID
+    # Method To Check ID
     def login_check(self):
-        # Count ID in DB
+        # Count ID and PIN in DB
         sql = "SELECT COUNT(1) FROM %s WHERE ID = %s and PIN = %s" % (table_name, self.id, self.pin)
         try:
             # Execute the SQL command
@@ -48,16 +48,16 @@ class DBOperation:
             # Fetch all the rows in a list of lists.
             results = cursor.fetchall()
         except:
-            print "Error : Cant Fetch Data123"
+            print "Error : Cant Fetch Data"
         # Change tuple To int
         check = int(results[0][0])
         # Check = 0 if ID is not Exist // Check = 1 if ID is Exist
         return check
 
 # ============================================[  Balance Check Method  ]================================================
-    # Function To Check ID
+    # Method To ID Balance
     def balance_check(self):
-        # Count ID in DB
+        # Get ID balance
         sql = "SELECT balance FROM %s WHERE ID = %s" % (table_name, self.id)
         try:
             # Execute the SQL command
@@ -68,13 +68,13 @@ class DBOperation:
             print "Error : Cant Fetch Data"
         # Change tuple To int
         balance = int(results[0][0])
-        # Check = 0 if ID is not Exist // Check = 1 if ID is Exist
+        # Return Balance Value
         return balance
 
-# ============================================[ Update Method ]=========================================================
-    # Function To Update User
+# ============================================[ Update Balance Method ]=================================================
+    # Method To Update User Balance
     def add_balance(self, balance):
-        # Insert New User
+        # Insert New Balance
         sql = "UPDATE %s  SET balance = %s WHERE ID = %s " % (table_name, balance, self.id)
         try:
             # Execute the SQL command
@@ -86,7 +86,8 @@ class DBOperation:
             db.rollback()
 
 # ============================================[ ID Check Method ]=======================================================
-    # Function To Check ID
+    # This Method For Transfer
+    # Method To Check ID
     def id_check(self):
         # Count ID in DB
         sql = "SELECT COUNT(1) FROM %s WHERE ID = %s" % (table_name, self.id)
@@ -102,9 +103,9 @@ class DBOperation:
         # Check = 0 if ID is not Exist // Check = 1 if ID is Exist
         return check
 
-# ============================================[ Insert Method ]=========================================================
-    # Function To Insert User
-    def insert_user(self, balance):
+# ============================================[ Add Card Method ]=======================================================
+    # Method To New Card
+    def add_card(self, balance):
         # Insert New User
         sql = "INSERT INTO %s (ID, PIN ,balance ) VALUES (%s, %s, %s)" % (table_name, self.id, self.pin, balance)
         try:
@@ -116,10 +117,10 @@ class DBOperation:
             # Rollback in case there is any error
             db.rollback()
 
-# ============================================[ ATM Balance Check ]=====================================================
+# ============================================[ ATM Info Check ]========================================================
     # Function To Check ATM Balance
     def atm_full_check(self):
-        # Get ATM Balance
+        # Get ATM Info
         sql = "SELECT * FROM atm WHERE 1"
         try:
             # Execute the SQL command
@@ -147,22 +148,68 @@ class DBOperation:
             # Rollback in case there is any error
             db.rollback()
 
-
 # ============================================[ Update 200 / 100/ 50 values ]===========================================
     # Function To Update Update 200 / 100/ 50 values
-    def atm_x200x100x50_update(self, x200, x100, x50, x20, x10):
+    def atm_x200x100x50_update(self, numberstoreplace):
+
         # Update ATM Balance
-        sql = "UPDATE `atm` SET `200` = '%s', `100` = '%s', `50` = '%s', `20` = '%s', `10` = '%s' WHERE `atm`.`id` = 1" % (x200, x100, x50, x20, x10)
+        sql = "UPDATE `atm` SET `200` = '%s', `100` = '%s', `50` = '%s'" \
+              ", `20` = '%s'" \
+              ", `10` = '%s' WHERE `atm`.`id` = 1" \
+              % (numberstoreplace[0], numberstoreplace[1], numberstoreplace[2], numberstoreplace[3], numberstoreplace[4])
         try:
             # Execute the SQL command
             cursor.execute(sql)
             # Commit your changes in the database
             db.commit()
-            print "sucsee"
         except:
             # Rollback in case there is any error
             db.rollback()
-            print"fail"
+
+
+# =============================================@@@[Delete]@@@=========================================================
+def delete_rows():
+    # Get all ID in Table information
+    sql = "SELECT ID FROM information WHERE 1"
+    try:
+        # Execute the SQL command
+        cursor.execute(sql)
+        # Fetch all the rows in a list of lists.
+        results1 = cursor.fetchall()
+    except:
+        print "Error : Cant Fetch Data"
+
+    # Operation For Every ID
+    for result in results1:
+        # Get Number OF Operations Of ID
+        sql2 = "SELECT COUNT(1) FROM logs WHERE ID = %s" % result
+        try:
+            # Execute the SQL command
+            cursor.execute(sql2)
+            # Fetch all the rows in a list of lists.
+            results2 = cursor.fetchall()
+            # IF Number OF Operation > 5
+            if int(results2[0][0]) > 5:
+                number = int(results2[0][0]) - 5
+
+                # Select Last Operations
+                sql3 = "SELECT Num FROM logs  WHERE ID = %s ORDER BY Num ASC LIMIT %s " % (int(result[0]), number)
+                cursor.execute(sql3)
+                results3 = cursor.fetchall()
+                for results in results3:
+                    # remove Last Operations
+                    sql4 = "DELETE FROM logs WHERE Num = %s " % int(results[0])
+                    try:
+                        cursor.execute(sql4)
+                        db.commit()
+                    except:
+                        # Rollback in case there is any error
+                        db.rollback()
+        except:
+            print "Error : Cant Fetch Data"
+
+
+delete_rows()
 
 # ======================================================================================================================
 # Disconnect from server

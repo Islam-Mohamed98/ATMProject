@@ -48,18 +48,21 @@ class date_logs:
 
 # ============================================[  Insert Operation  ]====================================================
     # Function To Check 1st
-    def insert_operation(self, totalwithdraw, totaldepposite):
-        sql = "INSERT INTO logs (ID, Date1 ,Day1, time1, operation, 1st, totalwithdraw, totaldepposite) VALUES ('%s','%s" \
-              "','%s','%s','%s', '%s', '%s', '%s')" % (self.id, self.date, self.day, self.time, self.operation, self.st1, totalwithdraw, totaldepposite)
+    def insert_operation(self, totalwithdraw, totaldepposite, balance):
+        sql = "INSERT INTO logs (ID, Date1 ,Day1, time1, operation, 1st, totalwithdraw, totaldepposite, " \
+              "balance) VALUES ('%s','%s" \
+              "','%s','%s'" \
+              ",'%s', '%s', '%s', '%s'" \
+              ", '%s')" \
+              % (self.id, self.date, self.day, self.time, self.operation
+                 , self.st1, totalwithdraw, totaldepposite, balance)
         try:
             # Execute the SQL command
             cursor.execute(sql)
             # Commit your changes in the database
             db.commit()
-            print " succ"
         except:
             # Rollback in case there is any error
-            print "error"
             db.rollback()
 
 # ============================================[  Get  Any Row  ]========================================================
@@ -74,7 +77,7 @@ class date_logs:
             # Fetch all the rows in a list of lists.
             results = cursor.fetchall()
         except:
-            print "Error : Cant Fetch Data1235"
+            print "Error : Cant Fetch Data"
         # Change tuple To int
         check = int(results[0][0])
         return check
@@ -90,7 +93,7 @@ class date_logs:
             # Fetch all the rows in a list of lists.
             results = cursor.fetchall()
         except:
-            print "Error : Cant Fetch Data1235"
+            print "Error : Cant Fetch Data"
         # Change tuple To int
         check = int(results[0][0])
         return check
@@ -100,13 +103,13 @@ class date_logs:
     #  History Return
     def get_history(self):
 
-        sql = "SELECT * FROM logs  WHERE ID = %s ORDER BY Num ASC " % self.id
+        sql = "SELECT * FROM logs  WHERE ID = %s ORDER BY Num DESC LIMIT 5 " % self.id
         try:
             # Execute the SQL command
             cursor.execute(sql)
             # Fetch all the rows in a list of lists.
             results = cursor.fetchall()
         except:
-            print "Error : Cant Fetch Data1235"
+            print "Error : Cant Fetch Data"
         # Change tuple To
         return results

@@ -1,5 +1,6 @@
 # Importing
 import time
+from time import gmtime, strftime
 from operations import *
 from data_logs import *
 
@@ -8,7 +9,6 @@ from data_logs import *
 ID = 1234  # --------------/////------/////-----> Ramon Ramon
 PIN = 0  # default value
 ID2 = 0  # default value
-from time import gmtime, strftime
 userday = strftime("%d", gmtime())
 usertime = strftime("%H:%M:%S")
 userhist = time.asctime()
@@ -18,18 +18,6 @@ option1 = 0
 option2 = 3
 
 print(time.asctime())
-
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-from time import gmtime, strftime
-print strftime("%a, %d %b %Y %H:%M:%S +0000")
-
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 while option1 == 0 and option2 != 0:
     print "Enter ur PIN"
@@ -63,11 +51,18 @@ while option1 == 0 and option2 != 0:
         option2 -= 1
         print "Wrong PIN  %s Chance" % option2
 
-# ========/Class DBOperation/========
-# ===      Get User Balance       ===
-    object1 = DBOperation(ID)
-    atmbc = object1.atm_full_check()
-# ===================================
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ========/User Info After Log In/========
+object1 = DBOperation(ID)
+atmbc = object1.atm_full_check()  # ATM Info
+if ID != 1:
+    totalinfo = UserCheck(ID, userhist, userday, usertime)
+    withdep = totalinfo.user_info_get()  # Total WithDraw and Deppsite In Day
+    totaldep = withdep[1]  # Total Deppsite In Day
+    userbalance = object1.balance_check()  # User Balance
+    allowedwithdraw = 5000 - withdep[0]  # Allowed WithDraw PerDay
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -78,9 +73,7 @@ if flag == 2:
     print "press 2 to  depposite Balance To ATM"
     x = int(input())
     if x == 1:
-        AtmBalance = DBOperation(ID, PIN)
-        balance = AtmBalance.atm_full_check()  # Get Atm Balance
-        print "ATM Balance Is %s" % balance[0][1]
+        print "ATM Balance Is %s" % atmbc[0][1]
     if x == 2:
         print "Enter Cash 200"
         x200 = int(input())
@@ -92,10 +85,10 @@ if flag == 2:
         x20 = int(input())
         print "Enter Cash 10"
         x10 = int(input())
-
+        NumberList = [x200, x100, x50, x20, x10]
         # =========/Class ATMFill/====================
         # ===      Return ATM Balnce               ===
-        AtmBalanceInsert = ATMFill(x200, x100, x50, x20, x10)
+        AtmBalanceInsert = ATMFill(NumberList)
         existbalance = AtmBalanceInsert.filling()
         # =============================================
 
@@ -117,25 +110,9 @@ elif flag == 1:
 
 # ========================================[ Windows3..withdraw ]========================================================
     if x == 1:
-# /////////////////////
-# //  Get ATM Values //
-        atm = DBOperation(ID)
-        atm_info = atm.atm_full_check()
-# /////////////////////
         print "Max of 200 = %s / 100 = %s / 50 = %s / 20 = %s 10 " \
-              "= %s" % (atm_info[0][2], atm_info[0][3], atm_info[0][4], atm_info[0][5], atm_info[0][6])
-        check1st = date_logs(ID, userhist, userday, usertime)
-        first = check1st.first_operation_check()  # Check if its First Operation For User
+              "= %s" % (atmbc[0][2], atmbc[0][3], atmbc[0][4], atmbc[0][5], atmbc[0][6])
 
-        if first == 0:
-            st1 = 1
-            totalwith = 0
-        else:
-            st1 = 0
-            checked = date_logs(ID, userhist, userday, usertime, 0, st1)
-            totalwith = checked.get_any_withdraw()  # Get Total Withdraw
-        userbalance = atm.balance_check()
-        allowedwithdraw = 5000 - totalwith
         print "Your Balance %s" % userbalance
         print "WithDraw Allowed %s" % allowedwithdraw  # if user balance >
         print "Enter Cash 200"
@@ -152,11 +129,11 @@ elif flag == 1:
         NumberList = [x200, x100, x50, x20, x10]
         # ===========/Class withdraw/============
         # ===      Return 0 or 1              ===
-        get_money = withdraw(ID, PIN, b, NumberList, atmbc, userhist, userday, usertime)
+        get_money = WithDraw(ID, PIN, b, NumberList, userhist, userday, usertime, withdep[2], withdep)
         check = get_money.gui_balance_check()
         # =======================================
-        userbalance = atm.balance_check()
-        print check
+        userbalance = object1.balance_check()
+        print check  # Operation
         print "your balance now %s" % userbalance
         print time.asctime()
 # ========================================[ Windows4..depposite ]=======================================================
@@ -176,7 +153,7 @@ elif flag == 1:
 
         # =============/class depposite/==============
     # ====      Add Balance                    ===
-        get_money2 = depposite(ID, PIN, b, NumberList, atmbc, userhist, userday, usertime)
+        get_money2 = depposite(ID, PIN, b, NumberList, userhist, userday, usertime, withdep[2], withdep)
         check = get_money2.add_balance()
     # ============================================
         if check == 1:
@@ -215,7 +192,7 @@ elif flag == 1:
 
         # =============/class transfer/==================
         # ====          Return 0 or 1                 ===
-            UserTrans = transfer(ID, ID2, b, cash)
+            UserTrans = transfer(ID, ID2, b, cash, userhist, userday, usertime, withdep[2], withdep)
             check = UserTrans.transfer_balance()
         # ===============================================
 
@@ -231,13 +208,14 @@ elif flag == 1:
         datalogs = date_logs(ID)
         results = datalogs.get_history()
         # Print History
-        print "---------------------------------------------------------------------------------------"
-        print "|      Date               |       Operation      |  Total widthdrow | TotalDeppsite    |"
-        print "---------------------------------------------------------------------------------------"
+        print "-------------------------------------------------------------------------------------------------------"
+        print "|      Date               |       Operation           |  Total widthdrow | TotalDeppsite    | Your Balance  |"
+        print "-------------------------------------------------------------------------------------------------------"
         for result in results:
 
-            print "|%s |  %s   |        %s      |       %s        |" % (result[2], result[5], result[7], result[8])
-            print "---------------------------------------------------------------------------------------"
+            print "|%s |  %s   |        %s      |       %s        |     %s       |"\
+                  % (result[2], result[5], result[7], result[8], result[9])
+            print "---------------------------------------------------------------------------------------------------"
 
 else:
     print "You Dont Have More Chance"
